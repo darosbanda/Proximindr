@@ -227,14 +227,15 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
 
     private boolean inRangeForNotification(Location location, Location target) {
         float distance = location.distanceTo(target);
-        return distance < 100 && distance > 90;
+        Log.d(TAG, "timeForNotification: RANGE IS: " + distance);
+        return distance < 120 && distance > 80;
     }
 
     private boolean isHeadingToTarget(Location location, Location target) {
         float currentBearing = location.getBearing();
         float targetBearing = location.bearingTo(target);
         Log.d(TAG, "isHeadingToTarget: currentBearing: " + currentBearing + " targetBearing: " + targetBearing + " targetBearing + 360: " + (targetBearing + 360));
-        return (currentBearing > (targetBearing - 10)) && (currentBearing < (targetBearing + 10));
+        return (currentBearing > (targetBearing - 40)) && (currentBearing < (targetBearing + 40));
     }
 
 
@@ -242,9 +243,11 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
         Location target = new Location("");
         target.setLatitude(r.getLatLng().latitude);
         target.setLongitude(r.getLatLng().longitude);
-        boolean headingToTarget = isHeadingToTarget(location, target);
         boolean inRange = inRangeForNotification(location, target);
+
         if (inRange) {
+            boolean headingToTarget = isHeadingToTarget(location, target);
+            Log.d(TAG, "timeForNotification: in range and headingToTarget: " + headingToTarget + " isDeparting: " + r.isDeparting());
             return (r.isDeparting() && !headingToTarget) || (!r.isDeparting() && headingToTarget);
         }
         return false;
@@ -254,9 +257,11 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
         return new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                Log.d(TAG, "onLocationChanged: Acc: " + location.getAccuracy());
                 if (location.getAccuracy() < 50 && !active) {
                     reminderStorage.getReminders().forEach(reminder -> {
                         if (timeForNotification(location, reminder)) {
+                            Log.d(TAG, "onLocationChanged: Reminder should be sent");
                             sendNotification(reminder);
                         }
                     });
