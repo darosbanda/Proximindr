@@ -1,22 +1,31 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="52dp"
-    android:orientation="horizontal" >
+    android:layout_width="match_parent"
+    android:layout_height="52dp">
 
 
         <TextView
             android:id="@+id/lblListHeader"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:paddingStart="6dip"
+            android:layout_alignParentLeft="true"
             android:paddingEnd="30dp"
+            android:paddingStart="6dip"
             android:paddingTop="6dip"
+            android:text="PLACEHOLDER"
             android:textColor="#CC0000"
             android:textSize="20dp"
             android:textStyle="bold"
             tools:ignore="SpUsage" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/delete_reminder_button"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_toLeftOf="@+id/lblListHeader"
+            android:text="@string/delete"
+            android:focusable="false"/>
+
+</RelativeLayout>

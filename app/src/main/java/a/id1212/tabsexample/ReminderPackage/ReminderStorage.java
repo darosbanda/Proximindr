@@ -45,12 +45,12 @@ public class ReminderStorage {
 
     public void removeReminder(int reminderPosition) {
         Reminder r = reminders.remove(reminderPosition);
-        removeNotification(r);
+        removeNotification(reminderPosition);
     }
 
-    private void removeNotification(Reminder r) {
+    private void removeNotification(int position) {
         listeners.forEach(listener -> {
-            listener.onReminderRemoved(r);
+            listener.onReminderRemoved(position);
         });
     }
 

@@ -12,5 +12,12 @@
         android:paddingLeft="15dp"
         />
 
+    <Button
+        android:id="@+id/sd"
+        android:gravity="end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/delete" />
+
 
 </android.support.constraint.ConstraintLayout>

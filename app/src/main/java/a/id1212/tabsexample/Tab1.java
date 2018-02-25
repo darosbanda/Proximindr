@@ -15,9 +15,11 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,10 +30,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.HashSet;
 
 import a.id1212.tabsexample.ReminderPackage.Reminder;
 import a.id1212.tabsexample.ReminderPackage.ReminderListener;
@@ -44,6 +44,7 @@ import a.id1212.tabsexample.ReminderPackage.ReminderStorage;
 public class Tab1 extends Fragment implements OnMapReadyCallback {
 
 
+    private static final String TAG = "TAB1";
     static boolean active = false;
     ReminderStorage reminderStorage = ReminderStorage.getInstance();
     CircleOptions outerOptions;
@@ -53,8 +54,7 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
     MapView mMapView;
     private GoogleMap googleMap;
     LocationManager locationManager;
-    LocationListener locationListener = createLocationListener();
-    LocationListener enteringCircle = alertIfEnteringCircle();
+    LocationListener notificationDispatcher = notificationDispatcher();
     ReminderListener listener = new ReminderListener() {
         @Override
         public void onReminderAdded(Reminder r) {
@@ -64,7 +64,7 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
         }
 
         @Override
-        public void onReminderRemoved(Reminder r) {
+        public void onReminderRemoved(int position) {
             googleMap.clear();
             renderReminders();
         }
@@ -135,6 +135,7 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
             DialogFragment newFragment = new Form();
             Bundle args = new Bundle();
             if (innerCircle == null) {
+                Toast.makeText(getActivity(), "Please select a location for a reminder", Toast.LENGTH_LONG).show();
                 return;
             }
             args.putDouble("lat", innerCircle.getCenter().latitude);
@@ -196,14 +197,14 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    private LocationListener createLocationListener() {
+    private LocationListener initialLocationListener() {
         return new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 if (location.getAccuracy() < 50) {
                     LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
-                    locationManager.removeUpdates(locationListener);
+                    locationManager.removeUpdates(this);
                 }
             }
 
@@ -230,7 +231,10 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
     }
 
     private boolean isHeadingToTarget(Location location, Location target) {
-        return (location.getBearing() > location.bearingTo(target) - 10) && (location.getBearing() < location.bearingTo(target) + 10);
+        float currentBearing = location.getBearing();
+        float targetBearing = location.bearingTo(target);
+        Log.d(TAG, "isHeadingToTarget: currentBearing: " + currentBearing + " targetBearing: " + targetBearing + " targetBearing + 360: " + (targetBearing + 360));
+        return (currentBearing > (targetBearing - 10)) && (currentBearing < (targetBearing + 10));
     }
 
 
@@ -246,7 +250,7 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
         return false;
     }
 
-    private LocationListener alertIfEnteringCircle() {
+    private LocationListener notificationDispatcher() {
         return new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -315,8 +319,8 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     private void registerInitialLocationListener() {
         try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, initialLocationListener());
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, initialLocationListener());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -325,8 +329,8 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     private void registerDistanceListener() {
         try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, enteringCircle);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, enteringCircle);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, notificationDispatcher);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, notificationDispatcher);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -35,15 +35,36 @@ public class Tab2 extends Fragment {
     private ReminderListener listener = new ReminderListener() {
         @Override
         public void onReminderAdded(Reminder r) {
-            getReminders();
+            addReminder(r);
             lv.setAdapter(new ExpandableListAdapter(groups, children, LayoutInflater.from(getActivity())));
         }
         @Override
-        public void onReminderRemoved(Reminder r) {
-
+        public void onReminderRemoved(int position) {
+            removeReminder(position);
         }
     };
 
+    private void removeReminder(int position) {
+        children.remove(groups.get(position));
+        groups.remove(position);
+    }
+
+
+    private void addReminder(Reminder r) {
+        Geocoder geo = new Geocoder(getActivity());
+        groups.add(r.getName());
+        List<String> temp = new ArrayList<>();
+        temp.add(r.getMessage());
+        String address = "Could not find address";
+        try {
+            address = geo.getFromLocation(r.getLatLng().latitude, r.getLatLng().longitude, 1).get(0).getAddressLine(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        temp.add(address);
+        temp.add("Remind me on: " + (r.isDeparting() ? "Departure" : "Arrival"));
+        children.put(r.getName(), temp);
+    }
 
     private void getReminders() {
         Geocoder geo = new Geocoder(getActivity());
@@ -60,7 +81,6 @@ public class Tab2 extends Fragment {
             }
             temp.add(address);
             temp.add("Remind me on: " + (r.isDeparting() ? "Departure" : "Arrival"));
-            temp.add("Delete " + r.getName());
             children.put(r.getName(), temp);
         });
     }

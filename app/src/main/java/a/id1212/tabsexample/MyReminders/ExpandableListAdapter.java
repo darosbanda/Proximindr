@@ -63,45 +63,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-
-        if (convertView == null) {
-            if (isLastChild) {
-                Log.d("FIRST TAG", "getChildView: isLastChild is true, groupPosition:" + groupPosition + " childPosition:" + childPosition);
-                convertView = inf.inflate(R.layout.delete_child, parent, false);
-                Button delete = convertView.findViewById(R.id.delete_reminder_button);
-                delete.setText(children.get(groups.get(groupPosition)).get(childPosition));
-                delete.setOnClickListener(v -> {
-                    children.remove(groups.get(groupPosition));
-                    groups.remove(groupPosition);
-                    reminderStorage.removeReminder(groupPosition);
-                    ExpandableListAdapter.this.notifyDataSetChanged();
-                });
-            } else {
-                Log.d("SECOND TAG", "getChildView: isLastChild is false, groupPosition:" + groupPosition + " childPosition:" + childPosition);
-                convertView = inf.inflate(R.layout.list_item, parent, false);
-                TextView textView = convertView.findViewById(R.id.lblListItem);
-                textView.setText(getChild(groupPosition, childPosition).toString());
-            }
-        } else {
-            Log.d("THIRD TAG", "getChildView: convertView was NOT NULL, groupPosition:" + groupPosition + " childPosition:" + childPosition);
-        }
-        return convertView;
-
-         /*   return convertView;
-        } else {
             ViewHolder holder;
             if (convertView == null) {
                 convertView = inf.inflate(R.layout.list_item, parent, false);
                 holder = new ViewHolder();
                 holder.text = convertView.findViewById(R.id.lblListItem);
-
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
             holder.text.setText(getChild(groupPosition, childPosition).toString());
         return convertView;
-        }*/
+
     }
 
     @Override
@@ -113,12 +86,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
             holder = new ViewHolder();
             holder.text = convertView.findViewById(R.id.lblListHeader);
+            holder.button = convertView.findViewById(R.id.delete_reminder_button);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.text.setText(getGroup(groupPosition).toString());
-
+        holder.button.setOnClickListener(v -> {
+            reminderStorage.removeReminder(groupPosition);
+            ExpandableListAdapter.this.notifyDataSetChanged();
+        });
         return convertView;
     }
 
@@ -129,5 +106,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private class ViewHolder {
         TextView text;
+        Button button;
     }
 }
