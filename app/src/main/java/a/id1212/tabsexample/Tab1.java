@@ -73,7 +73,7 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // inflat and return the layout
+
         View v = inflater.inflate(R.layout.tab1, container,
                 false);
         mMapView = v.findViewById(R.id.mapView);
@@ -225,17 +225,16 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
         };
     }
 
+
     private boolean inRangeForNotification(Location location, Location target) {
         float distance = location.distanceTo(target);
-        Log.d(TAG, "timeForNotification: RANGE IS: " + distance);
         return distance < 120 && distance > 80;
     }
 
     private boolean isHeadingToTarget(Location location, Location target) {
         float currentBearing = location.getBearing();
         float targetBearing = location.bearingTo(target);
-        Log.d(TAG, "isHeadingToTarget: currentBearing: " + currentBearing + " targetBearing: " + targetBearing + " targetBearing + 360: " + (targetBearing + 360));
-        return (currentBearing > (targetBearing - 40)) && (currentBearing < (targetBearing + 40));
+        return (currentBearing > (targetBearing - 45)) && (currentBearing < (targetBearing + 45));
     }
 
 
@@ -244,10 +243,8 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
         target.setLatitude(r.getLatLng().latitude);
         target.setLongitude(r.getLatLng().longitude);
         boolean inRange = inRangeForNotification(location, target);
-
         if (inRange) {
             boolean headingToTarget = isHeadingToTarget(location, target);
-            Log.d(TAG, "timeForNotification: in range and headingToTarget: " + headingToTarget + " isDeparting: " + r.isDeparting());
             return (r.isDeparting() && !headingToTarget) || (!r.isDeparting() && headingToTarget);
         }
         return false;
@@ -259,9 +256,8 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
             public void onLocationChanged(Location location) {
                 Log.d(TAG, "onLocationChanged: Acc: " + location.getAccuracy());
                 if (location.getAccuracy() < 50 && !active) {
-                    reminderStorage.getReminders().forEach(reminder -> {
+                    reminderStorage.getValidReminders().forEach(reminder -> {
                         if (timeForNotification(location, reminder)) {
-                            Log.d(TAG, "onLocationChanged: Reminder should be sent");
                             sendNotification(reminder);
                         }
                     });
@@ -318,6 +314,8 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
                 (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 
         mNotificationManager.notify(1, mBuilder.build());
+
+        r.notificationSent();
 
     }
 

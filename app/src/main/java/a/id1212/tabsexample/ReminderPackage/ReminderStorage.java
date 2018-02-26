@@ -5,6 +5,10 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import a.id1212.tabsexample.Configuration.ReminderConfiguration;
 
 
 public class ReminderStorage {
@@ -17,12 +21,6 @@ public class ReminderStorage {
     private List<Reminder> reminders = new ArrayList<>();
     private HashSet<ReminderListener> listeners = new HashSet<>();
 
-    private ReminderStorage() {
-        reminders.add(new Reminder("Electrum", "Reminder 1", new LatLng(59.404150, 17.949280), true));
-        reminders.add(new Reminder("Gallerian", "Reminder 2", new LatLng(59.403283, 17.946557), false));
-        reminders.add(new Reminder("Helenelund", "Reminder 3", new LatLng(59.409813, 17.962679), true));
-
-    }
 
     public void addReminder(Reminder r) {
         reminders.add(r);
@@ -54,4 +52,8 @@ public class ReminderStorage {
         });
     }
 
+    public List<Reminder> getValidReminders() {
+        List<Reminder> validReminders = reminders.stream().filter(Reminder::isValid).collect(Collectors.toList());
+        return validReminders;
+    }
 }

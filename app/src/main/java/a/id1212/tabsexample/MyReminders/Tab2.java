@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import a.id1212.tabsexample.Configuration.ReminderConfiguration;
 import a.id1212.tabsexample.R;
 import a.id1212.tabsexample.ReminderPackage.Reminder;
 import a.id1212.tabsexample.ReminderPackage.ReminderListener;
@@ -35,7 +36,7 @@ public class Tab2 extends Fragment {
     private ReminderListener listener = new ReminderListener() {
         @Override
         public void onReminderAdded(Reminder r) {
-            addReminder(r);
+            storeReminder(r);
             lv.setAdapter(new ExpandableListAdapter(groups, children, LayoutInflater.from(getActivity())));
         }
         @Override
@@ -50,8 +51,9 @@ public class Tab2 extends Fragment {
     }
 
 
-    private void addReminder(Reminder r) {
+    private void storeReminder(Reminder r) {
         Geocoder geo = new Geocoder(getActivity());
+        ReminderConfiguration config = r.getConfig();
         groups.add(r.getName());
         List<String> temp = new ArrayList<>();
         temp.add(r.getMessage());
@@ -63,26 +65,24 @@ public class Tab2 extends Fragment {
         }
         temp.add(address);
         temp.add("Remind me on: " + (r.isDeparting() ? "Departure" : "Arrival"));
+
+
+        if (!config.isOnce()) {
+            temp.add(config.getWeek().toString());
+            if (config.getInterval() != null) {
+                temp.add(config.getInterval().toString());
+            }
+            if (config.getPeriod() != null) {
+                temp.add(config.getPeriod().toString());
+            }
+        }
         children.put(r.getName(), temp);
     }
 
     private void getReminders() {
-        Geocoder geo = new Geocoder(getActivity());
+
         List<Reminder> reminders = reminderStorage.getReminders();
-        reminders.forEach(r -> {
-            groups.add(r.getName());
-            List<String> temp = new ArrayList<>();
-            temp.add(r.getMessage());
-            String address = "Could not find address";
-            try {
-                address = geo.getFromLocation(r.getLatLng().latitude, r.getLatLng().longitude, 1).get(0).getAddressLine(0);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            temp.add(address);
-            temp.add("Remind me on: " + (r.isDeparting() ? "Departure" : "Arrival"));
-            children.put(r.getName(), temp);
-        });
+        reminders.forEach(this::storeReminder);
     }
 
     public void onCreate(Bundle savedInstanceState) {
