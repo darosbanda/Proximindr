@@ -1,10 +1,9 @@
-package a.id1212.tabsexample.Configuration;
+package a.id2216.proxmindr.ReminderPackage.Configuration;
 
 
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
+import com.google.firebase.database.Exclude;
 
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,7 @@ import java.util.Map;
 public class Week {
 
 
-    private List<Integer> days;
+    public List<Integer> days = new ArrayList<>();
     static private Map<Integer, String> map = new HashMap<>();
     static {
         map.put(2, "Monday");
@@ -34,7 +33,7 @@ public class Week {
 
     }
 
-
+    @Exclude
     public void setDays(List<Integer> days) {
         this.days = days;
     }
@@ -44,17 +43,17 @@ public class Week {
     @Override
     public String toString() {
 
-        String result = "Days: ";
+        StringBuilder result = new StringBuilder("Days: ");
 
         for(Integer i : days) {
-            result += map.get(i) + ", ";
+            result.append(map.get(i)).append(", ");
         }
 
         return result.substring(0, result.length()-2);
 
     }
 
-
+    @Exclude
     public List<Integer> getDays() {
         return days;
     }

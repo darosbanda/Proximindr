@@ -1,55 +1,72 @@
-package a.id1212.tabsexample.ReminderPackage;
+package a.id2216.proxmindr.ReminderPackage;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.Exclude;
 
-import a.id1212.tabsexample.Configuration.ReminderConfiguration;
+import a.id2216.proxmindr.ReminderPackage.Configuration.ReminderConfiguration;
 
 public class Reminder {
-    private String name;
-    private String message;
-    private LatLng latLng;
-    private ReminderConfiguration config;
+    public String name;
+    public String message;
+    public double lat;
+    public double lng;
+    public ReminderConfiguration config;
 
-    public Reminder(String name, String message, LatLng latLng, ReminderConfiguration config) {
+    public Reminder(String name, String message, double lat, double lng, ReminderConfiguration config) {
         this.message = message;
-        this.latLng = latLng;
+        this.lat = lat;
+        this.lng = lng;
         this.name = name;
         this.config = config;
     }
 
+    public Reminder() {
+    }
 
+    @Exclude
     public String getMessage() {
         return message;
     }
 
+    @Exclude
     public void setMessage(String message) {
         this.message = message;
     }
 
+    @Exclude
     public LatLng getLatLng() {
-        return latLng;
+        return new LatLng(lat, lng);
     }
 
-    public void setLatLng(LatLng latLng) {
-        this.latLng = latLng;
+    @Exclude
+    public void setLatLng(double lat, double lng) {
+        this.lat = lat;
+        this.lng = lng;
     }
 
+
+    @Exclude
     public String getName() {
         return name;
     }
 
+    @Exclude
     public void setName(String name) {
         this.name = name;
     }
 
+    @Exclude
     public boolean isValid() {
         return config.isValid();
     }
 
+
+    @Exclude
     public boolean isDeparting() {
         return config.isDeparting();
     }
 
+    @Exclude
     public ReminderConfiguration getConfig() {
         return config;
     }
@@ -57,4 +74,6 @@ public class Reminder {
     public void notificationSent() {
         config.setLatestNotification();
     }
+
+
 }

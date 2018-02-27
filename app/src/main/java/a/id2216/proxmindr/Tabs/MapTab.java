@@ -1,4 +1,4 @@
-package a.id1212.tabsexample;
+package a.id2216.proxmindr.Tabs;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
@@ -33,15 +33,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
-import a.id1212.tabsexample.ReminderPackage.Reminder;
-import a.id1212.tabsexample.ReminderPackage.ReminderListener;
-import a.id1212.tabsexample.ReminderPackage.ReminderStorage;
+import a.id2216.proxmindr.Form;
+import a.id2216.proxmindr.MainActivity;
+import a.id2216.proxmindr.R;
+import a.id2216.proxmindr.ReminderPackage.Reminder;
+import a.id2216.proxmindr.Listeners.ReminderListener;
+import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 
 
 /**
  * A fragment that launches other parts of the demo application.
  */
-public class Tab1 extends Fragment implements OnMapReadyCallback {
+public class MapTab extends Fragment implements OnMapReadyCallback {
 
 
     private static final String TAG = "TAB1";
@@ -57,24 +60,25 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
     LocationListener notificationDispatcher = notificationDispatcher();
     ReminderListener listener = new ReminderListener() {
         @Override
-        public void onReminderAdded(Reminder r) {
+        public void onReminderAdded(String key, Reminder r) {
             MarkerOptions options = new MarkerOptions();
             options.position(r.getLatLng()).title(r.getName());
             googleMap.addMarker(options);
         }
 
         @Override
-        public void onReminderRemoved(int position) {
+        public void onReminderRemoved(String key) {
             googleMap.clear();
             renderReminders();
         }
+
     };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View v = inflater.inflate(R.layout.tab1, container,
+        View v = inflater.inflate(R.layout.map_tab, container,
                 false);
         mMapView = v.findViewById(R.id.mapView);
 
@@ -192,7 +196,7 @@ public class Tab1 extends Fragment implements OnMapReadyCallback {
     }
 
     private void renderReminders() {
-        reminderStorage.getReminders().forEach(reminder -> {
+        reminderStorage.getReminders().values().forEach(reminder -> {
             googleMap.addMarker(new MarkerOptions().position(reminder.getLatLng()).title(reminder.getName()));
         });
     }

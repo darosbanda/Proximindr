@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "522933906728",
+    "firebase_url": "https://proxmindr.firebaseio.com",
+    "project_id": "proxmindr",
+    "storage_bucket": "proxmindr.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:522933906728:android:7f0ad87b12a8a1db",
+        "android_client_info": {
+          "package_name": "a.id2216.proxmindr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "522933906728-o63tah03l5lumcug6dp81bj1ik3acicg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTbO1V6GqaPowxHF0o-_1y-A6JuvlM-hs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

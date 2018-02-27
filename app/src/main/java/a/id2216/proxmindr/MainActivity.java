@@ -1,4 +1,4 @@
-package a.id1212.tabsexample;
+package a.id2216.proxmindr;
 
 import android.support.design.widget.TabLayout;
 
@@ -11,12 +11,12 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.util.Log;
 
-import a.id1212.tabsexample.MyReminders.Tab2;
+import a.id2216.proxmindr.Tabs.MyRemindersTab.RemindersTab;
+import a.id2216.proxmindr.Tabs.MapTab;
 
 public class MainActivity extends AppCompatActivity {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
-    //ReminderStorage reminderStorage = ReminderStorage.getInstance();
     private static final String TAG = "MyActivity";
     private ViewPager mViewPager;
 
@@ -66,9 +66,11 @@ public class MainActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return new Tab1();
+                    return new MapTab();
                 case 1:
-                    return new Tab2();
+                    return new RemindersTab();
+               // case 2:
+                 //   return new UserTab();
             }
             return null;
         }

@@ -1,4 +1,4 @@
-package a.id1212.tabsexample;
+package a.id2216.proxmindr;
 
 import android.app.AlertDialog;
 
@@ -17,7 +17,6 @@ import com.borax12.materialdaterangepicker.date.DatePickerDialog;
 import com.borax12.materialdaterangepicker.time.RadialPickerLayout;
 import com.borax12.materialdaterangepicker.time.TimePickerDialog;
 import com.dpro.widgets.WeekdaysPicker;
-import com.google.android.gms.maps.model.LatLng;
 
 
 import org.joda.time.LocalDate;
@@ -25,18 +24,19 @@ import org.joda.time.LocalTime;
 
 import java.util.Calendar;
 
-import a.id1212.tabsexample.Configuration.Interval;
-import a.id1212.tabsexample.Configuration.Period;
-import a.id1212.tabsexample.Configuration.ReminderConfiguration;
-import a.id1212.tabsexample.Configuration.Week;
-import a.id1212.tabsexample.ReminderPackage.Reminder;
-import a.id1212.tabsexample.ReminderPackage.ReminderStorage;
+import a.id2216.proxmindr.ReminderPackage.Configuration.Interval;
+import a.id2216.proxmindr.ReminderPackage.Configuration.Period;
+import a.id2216.proxmindr.ReminderPackage.Configuration.ReminderConfiguration;
+import a.id2216.proxmindr.ReminderPackage.Configuration.Week;
+import a.id2216.proxmindr.ReminderPackage.Reminder;
+import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 
 import com.borax12.materialdaterangepicker.date.DatePickerDialog.OnDateSetListener;
 import com.borax12.materialdaterangepicker.time.TimePickerDialog.OnTimeSetListener;
 
 public class Form extends DialogFragment implements OnDateSetListener, OnTimeSetListener {
     ReminderStorage rstorage = ReminderStorage.getInstance();
+    FirebaseHandler fbHandler = new FirebaseHandler();
     Period period;
     Interval interval;
     Week week;
@@ -66,6 +66,9 @@ public class Form extends DialogFragment implements OnDateSetListener, OnTimeSet
 
         final ToggleButton recurring = view.findViewById(R.id.recurring);
         recurring.setOnCheckedChangeListener((compoundButton, b) -> {
+            if (b) {
+                week.setDays(widget.getSelectedDays());
+            }
             View layout = view.findViewById(R.id.extras);
             layout.setVisibility(b ? View.VISIBLE : View.GONE);
         });
@@ -114,16 +117,18 @@ public class Form extends DialogFragment implements OnDateSetListener, OnTimeSet
 
         builder.setView(view)
                 .setPositiveButton("Add reminder", (dialogInterface, i) -> {
-                    if (week != null && week.getDays().size() == 0) {
+                    if (recurring.isChecked() && week.getDays().size() == 0) {
                         Toast.makeText(getActivity(), "Please specify the days you want to be reminded.", Toast.LENGTH_SHORT).show();
                         return;
-
+                    }
+                    if (name.getText().equals("") || message.getText().equals("")) {
+                        Toast.makeText(getActivity(), "Please add a title and a message for the reminder.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
                     ReminderConfiguration config = getReminderConfiguration(recurring, departing);
                     String reminderName = name.getText().toString();
                     String reminderMessage = message.getText().toString();
-                    LatLng latLng = new LatLng(lat, lng);
-                    Reminder r = new Reminder(reminderName, reminderMessage, latLng, config);
+                    Reminder r = new Reminder(reminderName, reminderMessage, lat, lng, config);
                     rstorage.addReminder(r);
                 }).setNegativeButton("Cancel", (dialogInterface, i) -> Form.this.getDialog().cancel());
 
@@ -133,11 +138,13 @@ public class Form extends DialogFragment implements OnDateSetListener, OnTimeSet
     @NonNull
     private ReminderConfiguration getReminderConfiguration(ToggleButton recurring, ToggleButton departing) {
         ReminderConfiguration config = new ReminderConfiguration();
-        config.setWeek(week);
-        config.setInterval(interval);
-        config.setOnce(!recurring.isChecked());
+        if (recurring.isChecked()) {
+            config.setWeek(week);
+            config.setInterval(interval);
+            config.setPeriod(period);
+        }
+        config.setRecurring(recurring.isChecked());
         config.setDeparting(departing.isChecked());
-        config.setPeriod(period);
         return config;
     }
 

@@ -1,4 +1,4 @@
-package a.id1212.tabsexample.MyReminders;
+package a.id2216.proxmindr.Tabs.MyRemindersTab;
 
 
 
@@ -16,15 +16,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import a.id1212.tabsexample.Configuration.ReminderConfiguration;
-import a.id1212.tabsexample.R;
-import a.id1212.tabsexample.ReminderPackage.Reminder;
-import a.id1212.tabsexample.ReminderPackage.ReminderListener;
-import a.id1212.tabsexample.ReminderPackage.ReminderStorage;
+import a.id2216.proxmindr.ReminderPackage.Configuration.ReminderConfiguration;
+import a.id2216.proxmindr.R;
+import a.id2216.proxmindr.ReminderPackage.Reminder;
+import a.id2216.proxmindr.Listeners.ReminderListener;
+import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 
 
-public class Tab2 extends Fragment {
+public class RemindersTab extends Fragment {
 
 
 
@@ -35,27 +36,38 @@ public class Tab2 extends Fragment {
     private HashMap<String, List<String>> children = new HashMap<>();
     private ReminderListener listener = new ReminderListener() {
         @Override
-        public void onReminderAdded(Reminder r) {
-            storeReminder(r);
-            lv.setAdapter(new ExpandableListAdapter(groups, children, LayoutInflater.from(getActivity())));
+        public void onReminderAdded(String key, Reminder r) {
+            storeReminder(key, r);
+            render();
         }
         @Override
-        public void onReminderRemoved(int position) {
-            removeReminder(position);
+        public void onReminderRemoved(String key) {
+            removeReminder(key);
+            render();
         }
     };
 
-    private void removeReminder(int position) {
-        children.remove(groups.get(position));
-        groups.remove(position);
+    private void render() {
+        lv.setAdapter(new ExpandableListAdapter(groups, children, LayoutInflater.from(getActivity())));
+    }
+
+    private void removeReminder(String key) {
+        for (String group : groups) {
+            if (children.get(group).get(0).equals(key)){
+                children.remove(group);
+                groups.remove(group);
+                break;
+            }
+        }
     }
 
 
-    private void storeReminder(Reminder r) {
+    private void storeReminder(String key, Reminder r) {
         Geocoder geo = new Geocoder(getActivity());
         ReminderConfiguration config = r.getConfig();
         groups.add(r.getName());
         List<String> temp = new ArrayList<>();
+        temp.add(key);
         temp.add(r.getMessage());
         String address = "Could not find address";
         try {
@@ -66,8 +78,7 @@ public class Tab2 extends Fragment {
         temp.add(address);
         temp.add("Remind me on: " + (r.isDeparting() ? "Departure" : "Arrival"));
 
-
-        if (!config.isOnce()) {
+        if (config.isRecurring()) {
             temp.add(config.getWeek().toString());
             if (config.getInterval() != null) {
                 temp.add(config.getInterval().toString());
@@ -80,9 +91,11 @@ public class Tab2 extends Fragment {
     }
 
     private void getReminders() {
+        Map<String, Reminder> reminderMap = reminderStorage.getReminders();
 
-        List<Reminder> reminders = reminderStorage.getReminders();
-        reminders.forEach(this::storeReminder);
+        for (Map.Entry<String, Reminder> stringReminderEntry : reminderMap.entrySet()) {
+            storeReminder(stringReminderEntry.getKey(), stringReminderEntry.getValue());
+        }
     }
 
     public void onCreate(Bundle savedInstanceState) {
@@ -94,7 +107,7 @@ public class Tab2 extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.tab2, container, false);
+        rootView = inflater.inflate(R.layout.my_reminders_tab, container, false);
         return rootView;
     }
 
@@ -103,7 +116,7 @@ public class Tab2 extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         lv = view.findViewById(R.id.expListView);
-        lv.setAdapter(new ExpandableListAdapter(groups, children, LayoutInflater.from(getActivity())));
+        render();
         lv.setGroupIndicator(null);
     }
 

@@ -1,6 +1,5 @@
-package a.id1212.tabsexample.MyReminders;
+package a.id2216.proxmindr.Tabs.MyRemindersTab;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +10,8 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.List;
 
-import a.id1212.tabsexample.R;
-import a.id1212.tabsexample.ReminderPackage.ReminderStorage;
+import a.id2216.proxmindr.R;
+import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private ReminderStorage reminderStorage = ReminderStorage.getInstance();
@@ -63,6 +62,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+
+        //if (childPosition != 0) {
             ViewHolder holder;
             if (convertView == null) {
                 convertView = inf.inflate(R.layout.list_item, parent, false);
@@ -72,9 +73,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
+            if (childPosition == 0) {
+                holder.text.setVisibility(View.GONE);
+                return convertView;
+            }
             holder.text.setText(getChild(groupPosition, childPosition).toString());
-        return convertView;
+            holder.text.setVisibility(View.VISIBLE);
+            return convertView;
+       // }
 
+
+        //convertView.setVisibility(View.GONE);
+        //return convertView;
     }
 
     @Override
@@ -93,8 +103,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
         holder.text.setText(getGroup(groupPosition).toString());
         holder.button.setOnClickListener(v -> {
-            reminderStorage.removeReminder(groupPosition);
-            ExpandableListAdapter.this.notifyDataSetChanged();
+            List<String> temp = children.get(groups.get(groupPosition));
+            reminderStorage.removeReminder(temp.get(0));
+            //ExpandableListAdapter.this.notifyDataSetChanged();
         });
         return convertView;
     }
