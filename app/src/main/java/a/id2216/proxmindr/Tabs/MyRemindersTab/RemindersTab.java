@@ -32,8 +32,8 @@ public class RemindersTab extends Fragment {
     ReminderStorage reminderStorage = ReminderStorage.getInstance();
     View rootView;
     ExpandableListView lv;
-    private List<String> groups = new ArrayList<>();
-    private HashMap<String, List<String>> children = new HashMap<>();
+    private ArrayList<String> groups = new ArrayList<>();
+    private ArrayList<List<String>> children = new ArrayList<>();
     private ReminderListener listener = new ReminderListener() {
         @Override
         public void onReminderAdded(String key, Reminder r) {
@@ -52,13 +52,25 @@ public class RemindersTab extends Fragment {
     }
 
     private void removeReminder(String key) {
+        for (int i = 0; i < groups.size(); i++) {
+            List<String> currentChild = children.get(i);
+            if (currentChild.get(0).equals(key)){
+                children.remove(i);
+                groups.remove(i);
+            }
+        }
+
+
+        /*
+        int i = 0;
         for (String group : groups) {
             if (children.get(group).get(0).equals(key)){
                 children.remove(group);
-                groups.remove(group);
+                groups.remove(i);
                 break;
             }
-        }
+
+        }*/
     }
 
 
@@ -87,7 +99,7 @@ public class RemindersTab extends Fragment {
                 temp.add(config.getPeriod().toString());
             }
         }
-        children.put(r.getName(), temp);
+        children.add(temp);
     }
 
     private void getReminders() {

@@ -4,7 +4,7 @@
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
+    <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
@@ -16,5 +16,8 @@
     </string>
     <string name="map">Map</string>
     <string name="my_reminders">My Reminders</string>
+    <string name="action_settings">Settings</string>
+    <string name="user">User</string>
+    <string name="search_for_a_location">Search for a location</string>
 
 </resources>

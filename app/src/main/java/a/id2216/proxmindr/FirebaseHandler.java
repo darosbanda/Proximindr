@@ -12,15 +12,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import a.id2216.proxmindr.Listeners.FirebaseListener;
 import a.id2216.proxmindr.ReminderPackage.Reminder;
 
-
-/**
- * Created by daros on 2018-02-27.
- */
-
 public class FirebaseHandler {
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
-
-
 
     public void storeReminder(Reminder r) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();

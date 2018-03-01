@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -15,13 +17,22 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.AutocompletePredictionBufferResponse;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.PlacesOptions;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -30,8 +41,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task;
 
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import a.id2216.proxmindr.Form;
 import a.id2216.proxmindr.MainActivity;
@@ -118,8 +135,73 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
 
         mMapView.getMapAsync(this);
 
+
+
+        LatLngBounds bounds = new LatLngBounds(new LatLng(55.031069, 15.949084), new LatLng(68.459385, 18.097852));
+
+        final AutoCompleteTextView autocomplete = v.findViewById(R.id.autocomplete_in_map);
+        configureAutocompleteText(bounds, autocomplete);
+
+
         return v;
 
+    }
+
+    private void configureAutocompleteText(LatLngBounds bounds, AutoCompleteTextView autocomplete) {
+        autocomplete.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                PlacesOptions.Builder optionsBuilder = new PlacesOptions.Builder();
+                PlacesOptions options = optionsBuilder.build();
+                GeoDataClient client = Places.getGeoDataClient(getActivity(), options);
+                AutocompleteFilter filter = new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE).build();
+                Log.d(TAG, "afterTextChanged: GETTING TASKS");
+                Task<AutocompletePredictionBufferResponse> tasks = client.getAutocompletePredictions(editable.toString(), bounds, filter);
+                tasks.addOnCompleteListener(task -> {
+                    int count = task.getResult().getCount();
+                    count = count > 3 ? 3 : count;
+                    if (count < 1) {
+                        return;
+                    }
+                    String[] suggestions = new String[count];
+                    for (int i = 0; i < count; i++) {
+                        Log.d(TAG, "afterTextChanged: FOR LOOP");
+                        suggestions[i] = task.getResult().get(i).getFullText(null).toString();
+                    }
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_dropdown_item_1line, suggestions);
+                    autocomplete.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                });
+            }
+        });
+
+        autocomplete.setOnItemClickListener((adapterView, view12, i, l) -> {
+            Log.d(TAG, "onCreateView: CLICKED");
+            Geocoder geo = new Geocoder(getActivity());
+            List<Address> addresses = new ArrayList<>();
+            try {
+                addresses = geo.getFromLocationName(autocomplete.getText().toString(), 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (addresses.size() < 1) {
+                return;
+            }
+            LatLng latLng = new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
+            placeCircle(latLng);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
+
+        });
     }
 
     @Override
@@ -184,15 +266,17 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
     public void setUpMap(){
         googleMap.setMyLocationEnabled(true);
         googleMap.getUiSettings().setZoomControlsEnabled(false);
-        googleMap.setOnMapClickListener(latLng -> {
-            if (outerCircle != null)
-                outerCircle.remove();
-            if (innerCircle != null)
-                innerCircle.remove();
-            innerCircle = googleMap.addCircle(innerOptions.center(latLng));
-            outerCircle = googleMap.addCircle(outerOptions.center(latLng));
-        });
+        googleMap.setOnMapClickListener(this::placeCircle);
         renderReminders();
+    }
+
+    private void placeCircle(LatLng latLng) {
+        if (outerCircle != null)
+            outerCircle.remove();
+        if (innerCircle != null)
+            innerCircle.remove();
+        innerCircle = googleMap.addCircle(innerOptions.center(latLng));
+        outerCircle = googleMap.addCircle(outerOptions.center(latLng));
     }
 
     private void renderReminders() {
@@ -205,7 +289,7 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
         return new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if (location.getAccuracy() < 50) {
+                if (location.getAccuracy() <= 600) {
                     LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
                     locationManager.removeUpdates(this);
@@ -258,7 +342,6 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
         return new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Log.d(TAG, "onLocationChanged: Acc: " + location.getAccuracy());
                 if (location.getAccuracy() < 50 && !active) {
                     reminderStorage.getValidReminders().forEach(reminder -> {
                         if (timeForNotification(location, reminder)) {

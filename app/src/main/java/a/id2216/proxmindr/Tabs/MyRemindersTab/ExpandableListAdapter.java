@@ -7,6 +7,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,10 +17,10 @@ import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private ReminderStorage reminderStorage = ReminderStorage.getInstance();
     private final LayoutInflater inf;
-    private List<String> groups;
-    private HashMap<String, List<String>> children;
+    private ArrayList<String> groups;
+    private ArrayList<List<String>> children;
 
-    public ExpandableListAdapter(List<String> groups, HashMap<String, List<String>> children, LayoutInflater inf) {
+    public ExpandableListAdapter(ArrayList<String> groups, ArrayList<List<String>> children, LayoutInflater inf) {
         this.groups = groups;
         this.children = children;
         this.inf = inf;
@@ -32,7 +33,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return children.get(groups.get(groupPosition)).size();
+        return children.get(groupPosition).size();
     }
 
     @Override
@@ -42,7 +43,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return children.get(groups.get(groupPosition)).get(childPosition);
+        return children.get(groupPosition).get(childPosition);
     }
 
     @Override
@@ -62,8 +63,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-
-        //if (childPosition != 0) {
             ViewHolder holder;
             if (convertView == null) {
                 convertView = inf.inflate(R.layout.list_item, parent, false);
@@ -80,11 +79,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             holder.text.setText(getChild(groupPosition, childPosition).toString());
             holder.text.setVisibility(View.VISIBLE);
             return convertView;
-       // }
 
-
-        //convertView.setVisibility(View.GONE);
-        //return convertView;
     }
 
     @Override
@@ -103,9 +98,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
         holder.text.setText(getGroup(groupPosition).toString());
         holder.button.setOnClickListener(v -> {
-            List<String> temp = children.get(groups.get(groupPosition));
+            List<String> temp = children.get(groupPosition);
             reminderStorage.removeReminder(temp.get(0));
-            //ExpandableListAdapter.this.notifyDataSetChanged();
         });
         return convertView;
     }

@@ -4,12 +4,15 @@ import android.app.AlertDialog;
 
 
 import android.app.Dialog;
+
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -34,16 +37,19 @@ import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 import com.borax12.materialdaterangepicker.date.DatePickerDialog.OnDateSetListener;
 import com.borax12.materialdaterangepicker.time.TimePickerDialog.OnTimeSetListener;
 
+
+
 public class Form extends DialogFragment implements OnDateSetListener, OnTimeSetListener {
+    private static final String TAG = "FORM";
     ReminderStorage rstorage = ReminderStorage.getInstance();
-    FirebaseHandler fbHandler = new FirebaseHandler();
     Period period;
     Interval interval;
     Week week;
-    EditText dates;
-    EditText times;
+    TextView dates;
+    TextView times;
     ToggleButton datePicker;
     ToggleButton timePicker;
+
 
     @NonNull
     @Override
@@ -54,6 +60,7 @@ public class Form extends DialogFragment implements OnDateSetListener, OnTimeSet
         Calendar now = Calendar.getInstance();
 
         final View view = inflater.inflate(R.layout.form_view, null);
+
 
         final EditText name = view.findViewById(R.id.editText);
         final EditText message = view.findViewById(R.id.editText2);
@@ -117,11 +124,12 @@ public class Form extends DialogFragment implements OnDateSetListener, OnTimeSet
 
         builder.setView(view)
                 .setPositiveButton("Add reminder", (dialogInterface, i) -> {
+                    Log.d(TAG, "onCreateDialog: name: " + (name.getText().toString().equals("")) + " message: " + (message.getText().toString().equals("")));
                     if (recurring.isChecked() && week.getDays().size() == 0) {
                         Toast.makeText(getActivity(), "Please specify the days you want to be reminded.", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    if (name.getText().equals("") || message.getText().equals("")) {
+                    if (name.getText().toString().equals("") || message.getText().toString().equals("")) {
                         Toast.makeText(getActivity(), "Please add a title and a message for the reminder.", Toast.LENGTH_SHORT).show();
                         return;
                     }

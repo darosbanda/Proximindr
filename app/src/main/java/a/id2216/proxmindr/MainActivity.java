@@ -13,6 +13,7 @@ import android.util.Log;
 
 import a.id2216.proxmindr.Tabs.MyRemindersTab.RemindersTab;
 import a.id2216.proxmindr.Tabs.MapTab;
+import a.id2216.proxmindr.Tabs.UserTab;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         String action = getIntent().getAction();
-        Log.d(TAG, "onCreate: Action is: " + action);
         TabLayout tabLayout = findViewById(R.id.tabs);
 
 
@@ -69,15 +69,15 @@ public class MainActivity extends AppCompatActivity {
                     return new MapTab();
                 case 1:
                     return new RemindersTab();
-               // case 2:
-                 //   return new UserTab();
+                case 2:
+                    return new UserTab();
             }
             return null;
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
     }
 }

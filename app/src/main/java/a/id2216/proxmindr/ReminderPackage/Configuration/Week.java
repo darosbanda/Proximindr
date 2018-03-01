@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 
-/**
- * Created by daros on 2018-02-26.
- */
 
 public class Week {
 

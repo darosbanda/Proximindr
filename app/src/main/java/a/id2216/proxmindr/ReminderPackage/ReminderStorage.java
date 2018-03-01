@@ -1,5 +1,7 @@
 package a.id2216.proxmindr.ReminderPackage;
 
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,18 +14,23 @@ import a.id2216.proxmindr.Listeners.ReminderListener;
 
 
 public class ReminderStorage {
-    private static final ReminderStorage ourInstance = new ReminderStorage();
-    private FirebaseHandler fbHandler = new FirebaseHandler();
+    private static ReminderStorage ourInstance;
+    private FirebaseHandler fbHandler;
 
     public static ReminderStorage getInstance() {
+        if (ourInstance == null) {
+            ourInstance = new ReminderStorage(new FirebaseHandler());
+        }
         return ourInstance;
     }
 
     private Map<String, Reminder> reminders = new HashMap<>();
     private HashSet<ReminderListener> listeners = new HashSet<>();
 
-    public ReminderStorage () {
-        fbHandler.fetchReminders(new FirebaseListener() {
+    public ReminderStorage (FirebaseHandler fbHandler) {
+        this.fbHandler = fbHandler;
+
+        this.fbHandler.fetchReminders(new FirebaseListener() {
             @Override
             public void reminderAdded(String key, Reminder reminder) {
                 reminders.put(key, reminder);
@@ -65,19 +72,14 @@ public class ReminderStorage {
 
     public void removeReminder(String key) {
         fbHandler.deleteReminder(key);
-    }
 
-    private void removeNotification(String key) {
-        listeners.forEach(listener -> {
-            listener.onReminderRemoved(key);
-        });
     }
 
     public List<Reminder> getValidReminders() {
-        List<Reminder> validReminders = reminders.values().stream().filter(Reminder::isValid).collect(Collectors.toList());
+        return reminders.values().stream().filter(Reminder::isValid).collect(Collectors.toList());
+    }
 
-
-        //List<Reminder> validReminders = reminders.stream().filter(Reminder::isValid).collect(Collectors.toList());
-        return validReminders;
+    public static void destroy() {
+        ourInstance = null;
     }
 }

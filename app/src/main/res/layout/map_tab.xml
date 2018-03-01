@@ -9,6 +9,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <LinearLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0px"
+        android:layout_height="0px"/>
+
+    <AutoCompleteTextView
+        android:id="@+id/autocomplete_in_map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:nextFocusUp="@id/autocomplete_in_map"
+        android:nextFocusLeft="@id/autocomplete_in_map"
+        android:padding="15dp"
+        android:background="@android:drawable/editbox_background_normal"
+        android:ems="10"
+        android:hint="@string/search_for_a_location"
+        android:inputType="textPersonName" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
