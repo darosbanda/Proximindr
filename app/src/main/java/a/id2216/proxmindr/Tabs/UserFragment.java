@@ -17,7 +17,7 @@ import a.id2216.proxmindr.R;
 import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 
 
-public class UserTab extends Fragment {
+public class UserFragment extends Fragment {
     FirebaseAuth auth = FirebaseAuth.getInstance();
 
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

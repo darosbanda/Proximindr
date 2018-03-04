@@ -1,7 +1,8 @@
-package a.id2216.proxmindr.Tabs.MyRemindersTab;
+package a.id2216.proxmindr.Tabs.MyReminders;
 
 
 
+import android.content.Context;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,7 +15,6 @@ import android.widget.ExpandableListView;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,13 +25,14 @@ import a.id2216.proxmindr.Listeners.ReminderListener;
 import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 
 
-public class RemindersTab extends Fragment {
+public class MyRemindersFragment extends Fragment {
 
 
 
-    ReminderStorage reminderStorage = ReminderStorage.getInstance();
-    View rootView;
-    ExpandableListView lv;
+    private Context mContext;
+    private ReminderStorage reminderStorage = ReminderStorage.getInstance();
+    private View rootView;
+    private ExpandableListView lv;
     private ArrayList<String> groups = new ArrayList<>();
     private ArrayList<List<String>> children = new ArrayList<>();
     private ReminderListener listener = new ReminderListener() {
@@ -47,8 +48,9 @@ public class RemindersTab extends Fragment {
         }
     };
 
+
     private void render() {
-        lv.setAdapter(new ExpandableListAdapter(groups, children, LayoutInflater.from(getActivity())));
+        lv.setAdapter(new ExpandableListAdapter(groups, children, LayoutInflater.from(mContext)));
     }
 
     private void removeReminder(String key) {
@@ -59,23 +61,11 @@ public class RemindersTab extends Fragment {
                 groups.remove(i);
             }
         }
-
-
-        /*
-        int i = 0;
-        for (String group : groups) {
-            if (children.get(group).get(0).equals(key)){
-                children.remove(group);
-                groups.remove(i);
-                break;
-            }
-
-        }*/
     }
 
 
     private void storeReminder(String key, Reminder r) {
-        Geocoder geo = new Geocoder(getActivity());
+        Geocoder geo = new Geocoder(mContext);
         ReminderConfiguration config = r.getConfig();
         groups.add(r.getName());
         List<String> temp = new ArrayList<>();
@@ -132,5 +122,9 @@ public class RemindersTab extends Fragment {
         lv.setGroupIndicator(null);
     }
 
-
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
 }

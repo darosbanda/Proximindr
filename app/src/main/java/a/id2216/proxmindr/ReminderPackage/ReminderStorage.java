@@ -1,6 +1,5 @@
 package a.id2216.proxmindr.ReminderPackage;
 
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,7 +71,6 @@ public class ReminderStorage {
 
     public void removeReminder(String key) {
         fbHandler.deleteReminder(key);
-
     }
 
     public List<Reminder> getValidReminders() {

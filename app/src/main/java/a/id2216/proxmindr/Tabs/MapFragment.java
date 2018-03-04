@@ -19,7 +19,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,10 +60,8 @@ import a.id2216.proxmindr.ReminderPackage.ReminderStorage;
 /**
  * A fragment that launches other parts of the demo application.
  */
-public class MapTab extends Fragment implements OnMapReadyCallback {
+public class MapFragment extends Fragment implements OnMapReadyCallback {
 
-
-    private static final String TAG = "TAB1";
     static boolean active = false;
     ReminderStorage reminderStorage = ReminderStorage.getInstance();
     CircleOptions outerOptions;
@@ -147,62 +144,7 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
 
     }
 
-    private void configureAutocompleteText(LatLngBounds bounds, AutoCompleteTextView autocomplete) {
-        autocomplete.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                PlacesOptions.Builder optionsBuilder = new PlacesOptions.Builder();
-                PlacesOptions options = optionsBuilder.build();
-                GeoDataClient client = Places.getGeoDataClient(getActivity(), options);
-                AutocompleteFilter filter = new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE).build();
-                Log.d(TAG, "afterTextChanged: GETTING TASKS");
-                Task<AutocompletePredictionBufferResponse> tasks = client.getAutocompletePredictions(editable.toString(), bounds, filter);
-                tasks.addOnCompleteListener(task -> {
-                    int count = task.getResult().getCount();
-                    count = count > 3 ? 3 : count;
-                    if (count < 1) {
-                        return;
-                    }
-                    String[] suggestions = new String[count];
-                    for (int i = 0; i < count; i++) {
-                        Log.d(TAG, "afterTextChanged: FOR LOOP");
-                        suggestions[i] = task.getResult().get(i).getFullText(null).toString();
-                    }
-                    final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_dropdown_item_1line, suggestions);
-                    autocomplete.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-                });
-            }
-        });
-
-        autocomplete.setOnItemClickListener((adapterView, view12, i, l) -> {
-            Log.d(TAG, "onCreateView: CLICKED");
-            Geocoder geo = new Geocoder(getActivity());
-            List<Address> addresses = new ArrayList<>();
-            try {
-                addresses = geo.getFromLocationName(autocomplete.getText().toString(), 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (addresses.size() < 1) {
-                return;
-            }
-            LatLng latLng = new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
-            placeCircle(latLng);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
-
-        });
-    }
 
     @Override
     public void onStart() {
@@ -280,9 +222,8 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
     }
 
     private void renderReminders() {
-        reminderStorage.getReminders().values().forEach(reminder -> {
-            googleMap.addMarker(new MarkerOptions().position(reminder.getLatLng()).title(reminder.getName()));
-        });
+        reminderStorage.getReminders().values().forEach(reminder -> googleMap.addMarker(
+                new MarkerOptions().position(reminder.getLatLng()).title(reminder.getName())));
     }
 
     private LocationListener initialLocationListener() {
@@ -321,8 +262,8 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
 
     private boolean isHeadingToTarget(Location location, Location target) {
         float currentBearing = location.getBearing();
-        float targetBearing = location.bearingTo(target);
-        return (currentBearing > (targetBearing - 45)) && (currentBearing < (targetBearing + 45));
+        float bearingToTarget = location.bearingTo(target);
+        return (currentBearing > (bearingToTarget - 45)) && (currentBearing < (bearingToTarget + 45));
     }
 
 
@@ -400,7 +341,9 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
         NotificationManager mNotificationManager =
                 (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mNotificationManager.notify(1, mBuilder.build());
+        if (mNotificationManager != null) {
+            mNotificationManager.notify(1, mBuilder.build());
+        }
 
         r.notificationSent();
 
@@ -427,5 +370,59 @@ public class MapTab extends Fragment implements OnMapReadyCallback {
 
     }
 
+
+    private void configureAutocompleteText(LatLngBounds bounds, AutoCompleteTextView autocomplete) {
+        autocomplete.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                PlacesOptions.Builder optionsBuilder = new PlacesOptions.Builder();
+                PlacesOptions options = optionsBuilder.build();
+                GeoDataClient client = Places.getGeoDataClient(getActivity(), options);
+                AutocompleteFilter filter = new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE).build();
+                Task<AutocompletePredictionBufferResponse> tasks = client.getAutocompletePredictions(editable.toString(), bounds, filter);
+                tasks.addOnCompleteListener(task -> {
+                    int count = task.getResult().getCount();
+                    count = count > 3 ? 3 : count;
+                    if (count < 1) {
+                        return;
+                    }
+                    String[] suggestions = new String[count];
+                    for (int i = 0; i < count; i++) {
+                        suggestions[i] = task.getResult().get(i).getFullText(null).toString();
+                    }
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_dropdown_item_1line, suggestions);
+                    autocomplete.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                });
+            }
+        });
+
+        autocomplete.setOnItemClickListener((adapterView, view12, i, l) -> {
+            Geocoder geo = new Geocoder(getActivity());
+            List<Address> addresses = new ArrayList<>();
+            try {
+                addresses = geo.getFromLocationName(autocomplete.getText().toString(), 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (addresses.size() < 1) {
+                return;
+            }
+            LatLng latLng = new LatLng(addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
+            placeCircle(latLng);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15.0f));
+
+        });
+    }
 
 }

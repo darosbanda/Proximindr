@@ -9,11 +9,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.util.Log;
 
-import a.id2216.proxmindr.Tabs.MyRemindersTab.RemindersTab;
-import a.id2216.proxmindr.Tabs.MapTab;
-import a.id2216.proxmindr.Tabs.UserTab;
+import a.id2216.proxmindr.Tabs.MyReminders.MyRemindersFragment;
+import a.id2216.proxmindr.Tabs.MapFragment;
+import a.id2216.proxmindr.Tabs.UserFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return new MapTab();
+                    return new MapFragment();
                 case 1:
-                    return new RemindersTab();
+                    return new MyRemindersFragment();
                 case 2:
-                    return new UserTab();
+                    return new UserFragment();
             }
             return null;
         }
